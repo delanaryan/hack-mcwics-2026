@@ -26,6 +26,7 @@ const bookAuthor = document.getElementById("book-author");
 const reader = document.getElementById("reader");
 
 // Book data (FAKE FOR NOW)
+/*
 const books = {
     russian: [
         { title: "War and Peace", author: "Leo Tolstoy" },
@@ -42,6 +43,18 @@ const books = {
         { title: "Le comte de Monte-Cristo", author: "Alexandre Dumas" }
     ]
 };
+*/
+
+async function loadBooks() {
+    try {
+        const response = await fetch ("http://localhost:8000/api/books"); // Update with backend URL
+        const books = await response.json(); // Expected format: { russian: [...], french: [...], ... }
+        return books;
+    } catch (error) {
+        console.error("Error loading books:", error);
+        return {};
+    }
+}
 
 // Language → Book screen
 languageNext.addEventListener("click", () => {

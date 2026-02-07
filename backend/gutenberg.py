@@ -1,7 +1,7 @@
 import requests 
 import random 
 import sys
-from db import books_collection
+from backend.db import books_collection
 
 GUTENDEX_URL = "https://gutendex.com/books"
 
