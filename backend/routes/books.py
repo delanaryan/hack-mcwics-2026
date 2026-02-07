@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from db import books_collection
+from backend.db import books_collection
 
 router = APIRouter()
 

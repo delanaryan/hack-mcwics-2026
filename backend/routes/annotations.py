@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from db import annotations_collection
+from backend.db import annotations_collection
 
 router = APIRouter()
 

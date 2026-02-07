@@ -1,7 +1,7 @@
 # Connect to MongoDB and provide a database client
 
 from pymongo import MongoClient
-from config import MONGO_URI, DB_NAME
+from .config import MONGO_URI, DB_NAME
 import os
 
 client = MongoClient(MONGO_URI)

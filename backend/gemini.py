@@ -22,4 +22,4 @@ def explain_passage(passage: str):
     print(response.text)
     return response.text
 
-explain_passage("In the beginning God created the heaven and the earth. And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.")
+#explain_passage("In the beginning God created the heaven and the earth. And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.")

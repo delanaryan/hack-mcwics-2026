@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from services.gemini import explain_passage
+from backend.gemini import explain_passage
 
 router = APIRouter()
 
