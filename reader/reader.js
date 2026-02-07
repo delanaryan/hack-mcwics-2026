@@ -84,5 +84,32 @@ function openBook(book) {
     readerScreen.classList.remove("hidden");
 }
 
+// Highlight detection
+// Highlighting logic
+let selectedText = "";
 
+const explainBtn = document.getElementById("explanation-button");
+
+document.addEventListener("mouseup", () => {
+    const selection = window.getSelection();
+
+    if (!selection || selection.toString().trim() === "") {
+        explainBtn.classList.add("hidden");
+        return;
+    }
+
+    selectedText = selection.toString();
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+
+    explainBtn.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    explainBtn.style.left = `${rect.left + window.scrollX}px`;
+
+    explainBtn.classList.remove("hidden");
+});
+
+explainBtn.addEventListener("click", () => {
+    console.log("Selected text:", selectedText);
+});
 
