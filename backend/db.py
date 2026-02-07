@@ -2,6 +2,7 @@
 
 from pymongo import MongoClient
 from config import MONGO_URI, DB_NAME
+import os
 
 client = MongoClient(MONGO_URI)
 db = client[f"{DB_NAME}"]

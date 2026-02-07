@@ -1,5 +1,7 @@
 import requests 
 import random 
+import sys
+from db import books_collection
 
 GUTENDEX_URL = "https://gutendex.com/books"
 
@@ -33,6 +35,26 @@ def fetch_book_text(text_url):
         print("Error Fetching Book Text:", e)
         return ""
     
+def save_books_to_db(language="en", limit=10):
+    books = fetch_books_from_gutenberg(language=language, limit=limit)
+    saved_count = 0
+
+    for b in books:
+        book_id = str(b["id"])
+
+        if not books_collection.find_one({"book_id": book_id}):
+            text_url = b["formats"].get("text/plain; charset=utf-8") or b["formats"].get("text/plain")
+            book_data = {
+                "book_id": book_id,
+                "title": b["title"],
+                "language": language,
+                "text_url": text_url
+            }
+            books_collection.insert_one(book_data)
+            saved_count += 1
+    
+    print(f"Saved {saved_count} books to the database.")
+    return saved_count
 #--- For Testing ---#
 def get_random_paragraph(language="en"):
     books = fetch_books_from_gutenberg(language=language, limit=20)
