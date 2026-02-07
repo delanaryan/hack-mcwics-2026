@@ -16,7 +16,19 @@ def fetch_book_text(text_url):
     try: 
         res = requests.get(text_url)
         res.raise_for_status()
-        return res.text
+
+        text = res.text
+
+        start_token = "*** START OF THE PROJECT GUTENBERG EBOOK"
+        if start_token in text:
+            text = text.split(start_token, 1)[1]
+
+        end_token = "*** END OF THE PROJECT GUTENBERG EBOOK"
+        if end_token in text:
+            text = text.split(end_token, 1)[0]
+
+        return text.strip()
+    
     except requests.RequestException as e:
         print("Error Fetching Book Text:", e)
         return ""
