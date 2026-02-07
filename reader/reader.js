@@ -113,3 +113,28 @@ explainBtn.addEventListener("click", () => {
     console.log("Selected text:", selectedText);
 });
 
+// reader.js
+
+// Function to fetch books from the backend
+function fetchBooks() {
+    fetch('http://localhost:8000/api/books/') // Adjust the URL if necessary
+        .then(response => response.json())
+        .then(data => {
+            displayBooks(data);
+        })
+        .catch(error => console.error('Error fetching books:', error));
+}
+
+// Function to display books in the HTML
+function displayBooks(books) {
+    const bookList = document.getElementById('book-list');
+    bookList.innerHTML = ''; // Clear existing content
+    books.forEach(book => {
+        const bookItem = document.createElement('div');
+        bookItem.textContent = book.title; // Adjust based on your book object structure
+        bookList.appendChild(bookItem);
+    });
+}
+
+// Call fetchBooks when the page loads
+document.addEventListener('DOMContentLoaded', fetchBooks);
