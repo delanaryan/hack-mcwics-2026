@@ -3,7 +3,7 @@ from backend.db import books_collection
 from backend.gutenberg import fetch_books_from_gutenberg, save_books_to_db
 
 #router = APIRouter()
-router = APIRouter(prefix="/books", tags=["books"])
+router = APIRouter(tags=["books"])
 
 @router.get("/")
 def list_books():

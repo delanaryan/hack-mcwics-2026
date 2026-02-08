@@ -1,14 +1,16 @@
 # API File
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from backend.routes.books import router as books_router
 from backend.routes.annotations import router as annotations_router
 from backend.routes.ai import router as ai_router
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routes.books import router as books_router
 from backend.gutenberg import save_books_to_db
+from fastapi.responses import FileResponse
 app = FastAPI()
 
-app.include_router(books_router)
+#app.include_router(books_router)
 
 @app.on_event("startup")
 def startup_event():
@@ -29,10 +31,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def root():
-    return {"message": "Backend is running"}
-
 app.include_router(books_router, prefix="/api/books")
 app.include_router(annotations_router, prefix="/api/annotations")
 app.include_router(ai_router, prefix="/api/ai")
+
+app.mount("/static", StaticFiles(directory="reader"), name="static")
+
+@app.get("/")
+def root():
+    return FileResponse("reader/reader.html")

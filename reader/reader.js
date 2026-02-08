@@ -25,6 +25,7 @@ const bookTitle = document.getElementById("book-title");
 const bookAuthor = document.getElementById("book-author");
 const reader = document.getElementById("reader");
 
+const API_BASE_URL = "http://localhost:8000/api/books";
 // Book data (FAKE FOR NOW)
 /*
 const books = {
@@ -45,38 +46,53 @@ const books = {
 };
 */
 
-async function loadBooks() {
+async function fetchAllBooks() {
     try {
-        const response = await fetch ("http://localhost:8000/api/books"); // Update with backend URL
-        const books = await response.json(); // Expected format: { russian: [...], french: [...], ... }
-        return books;
-    } catch (error) {
-        console.error("Error loading books:", error);
-        return {};
+        const res = await fetch(`${API_BASE_URL}/`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+    } catch (err) {
+        console.error("Error fetching books:", err);
+        return [];
     }
 }
-
+const languageMap = {
+        "english": "en",
+        "russian": "ru",
+        "french": "fr",
+        "spanish": "es",
+        "german": "de",
+        "chinese": "zh"
+    };
 // Language → Book screen
-languageNext.addEventListener("click", () => {
+languageNext.addEventListener("click", async () => {
     const language = languageSelect.value;
     if (!language) return alert("Please select a language");
 
+    const langCode = languageMap[language] || language;
+    const allBooks = await fetchAllBooks();
+
+    const books = Array.isArray(allBooks)
+        ? allBooks.filter(b => (b.language || "").toLowerCase() === langCode)
+        : [];
+
     bookList.innerHTML = "";
 
-    books[language].forEach((book, index) => {
-        const li = document.createElement("li");
-        li.className = "p-3 border rounded cursor-pointer hover:bg-gray-100";
-        li.textContent = `${book.title} — ${book.author}`;
-
-        li.addEventListener("click", () => openBook(book));
-
-        bookList.appendChild(li);
-    });
+    if (books.length === 0) {
+        bookList.innerHTML = "<p class='text-gray-500'>No books found for this language.</p>";
+    } else {
+        books.forEach(book => {
+            const li = document.createElement("li");
+            li.className = "p-3 border rounded cursor-pointer hover:bg-gray-100";
+            li.textContent = book.title || "Untitled";
+            li.addEventListener("click", () => openBook(book));
+            bookList.appendChild(li);
+        });
+    }
 
     languageScreen.classList.add("hidden");
     bookScreen.classList.remove("hidden");
 });
-
 // Back button
 bookBack.addEventListener("click", () => {
     bookScreen.classList.add("hidden");
@@ -84,14 +100,37 @@ bookBack.addEventListener("click", () => {
 });
 
 // Open book
-function openBook(book) {
-    bookTitle.textContent = book.title;
-    bookAuthor.textContent = book.author;
+async function openBook(book) {
+    bookTitle.textContent = book.title || "Untitled";
+    bookAuthor.textContent = book.author || book.language || "";
 
-    reader.innerHTML = `
-    <p data-paragraph-id="1">This is the first paragraph of the book.</p>
-    <p data-paragraph-id="2">This is the second paragraph.</p>
-  `;
+    reader.innerHTML = "<p class='text-gray-500'>Loading book...</p>";
+
+    // Try backend book endpoint for full text
+    if (book.book_id) {
+        try {
+            const res = await fetch(`${API_BASE}/${book.book_id}`);
+            if (res.ok) {
+                const data = await res.json();
+                const raw = data.text || data.full_text || "";
+                if (raw) {
+                    const paras = raw.split(/\n{2,}/).map(p => p.trim()).filter(p => p);
+                    reader.innerHTML = paras.map((p, i) => `<p data-paragraph-id="${i+1}">${p}</p>`).join("");
+                } else if (data.text_url) {
+                    reader.innerHTML = `<p class='text-gray-500'>Book text available at: ${data.text_url}</p>`;
+                } else {
+                    reader.innerHTML = "<p class='text-gray-500'>Full text not available for this book.</p>";
+                }
+            } else {
+                reader.innerHTML = "<p class='text-gray-500'>Unable to fetch book details.</p>";
+            }
+        } catch (err) {
+            console.error("Error loading book content:", err);
+            reader.innerHTML = "<p class='text-gray-500'>Error loading book content.</p>";
+        }
+    } else {
+        reader.innerHTML = "<p class='text-gray-500'>No book id available.</p>";
+    }
 
     bookScreen.classList.add("hidden");
     readerScreen.classList.remove("hidden");
@@ -128,6 +167,7 @@ explainBtn.addEventListener("click", () => {
 
 // reader.js
 
+/*
 // Function to fetch books from the backend
 function fetchBooks() {
     fetch('http://localhost:8000/api/books/') // Adjust the URL if necessary
@@ -151,3 +191,4 @@ function displayBooks(books) {
 
 // Call fetchBooks when the page loads
 document.addEventListener('DOMContentLoaded', fetchBooks);
+*/
