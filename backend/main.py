@@ -1,14 +1,19 @@
 # API File
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from backend.routes.books import router as books_router
 from backend.routes.annotations import router as annotations_router
 from backend.routes.ai import router as ai_router
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routes.books import router as books_router
 from backend.gutenberg import save_books_to_db
+import os
+
 app = FastAPI()
 
-app.include_router(books_router)
+# Serve static files from the reader directory
+reader_dir = os.path.join(os.path.dirname(__file__), "..", "reader")
+if os.path.exists(reader_dir):
+    app.mount("/", StaticFiles(directory=reader_dir, html=True), name="static")
 
 @app.on_event("startup")
 def startup_event():
@@ -20,7 +25,6 @@ def startup_event():
         save_books_to_db(language="es", limit=10)  # Load 10 Spanish books on startup for testing
         save_books_to_db(language="fr", limit=10)  # Load 10 French books on startup for testing
 
-#CORS to allow frontend to access backend from different origin during development. In production, this should be configured more securely to only allow the frontend origin.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow all origins 
@@ -29,9 +33,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@app.get("/api/")
 def root():
-    return {"message": "Backend is running"}
+    return {"message": "Backend API is running"}
 
 app.include_router(books_router, prefix="/api/books")
 app.include_router(annotations_router, prefix="/api/annotations")
