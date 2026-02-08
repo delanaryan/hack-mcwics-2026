@@ -259,19 +259,24 @@ explainBtn.addEventListener("click", async () => {
 document.addEventListener("mouseup", () => {
     const selection = window.getSelection();
 
-    if (!selection || selection.toString().trim() === "") {
-       // explainBtn.classList.add("hidden");
+    if (!selection || selection.rangeCount === 0) {
+        explainBtn.classList.add("hidden");
         return;
     }
 
-    selectedText = selection.toString();
+    const text = selection.toString().trim();
+    if (!text) {
+        explainBtn.classList.add("hidden");
+        return;
+    }
+
+    selectedText = text;
 
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
 
-    explainBtn.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    explainBtn.style.top = `${rect.bottom + window.scrollY + 6}px`;
     explainBtn.style.left = `${rect.left + window.scrollX}px`;
-
     explainBtn.classList.remove("hidden");
 });
 
