@@ -12,5 +12,5 @@ languageNext.addEventListener("click", () => {
     sessionStorage.setItem("selectedLanguage", language);
 
     // Redirect to book selection page
-    window.location.href = "books.html";
+    window.location.href = "/static/reader.html";
 });

@@ -25,7 +25,7 @@ const bookTitle = document.getElementById("book-title");
 const bookAuthor = document.getElementById("book-author");
 const reader = document.getElementById("reader");
 
-const API_BASE_URL = "http://localhost:8000/api/books";
+const API_BASE_URL = "/api/books";
 // Book data (FAKE FOR NOW)
 /*
 const books = {
@@ -65,6 +65,15 @@ const languageMap = {
         "chinese": "zh",
         "italian": "it",
     };
+
+// Check if language was pre-selected from index.html
+const storedLanguage = sessionStorage.getItem("selectedLanguage");
+if (storedLanguage) {
+    languageSelect.value = storedLanguage;
+    // Automatically trigger the language selection flow
+    languageNext.click();
+}
+
 // Language → Book screen
 languageNext.addEventListener("click", async () => {
     const language = languageSelect.value;
