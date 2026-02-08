@@ -69,6 +69,14 @@
         Explain the text
     </button>
 
+    <div id="explanation-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-lg w-full relative">
+            <button id="close-modal" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900">&times;</button>
+            <h3 class="font-bold text-lg mb-4">AI Explanation</h3>
+            <div id="modal-content" class="text-sm text-gray-800 max-h-96 overflow-y-auto"></div>
+        </div>
+    </div>
+
     <script src="/static/reader.js"></script>
 </body>
 

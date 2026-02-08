@@ -171,32 +171,33 @@ let selectedText = "";
 
 const explainBtn = document.getElementById("explanation-button");
 
+const explanationModal = document.getElementById("explanation-modal");
+const modalContent = document.getElementById("modal-content");
+const closeModalBtn = document.getElementById("close-modal");
+
 explainBtn.addEventListener("click", async () => {
+    if (!selectedText) return;
+
     try {
-        const res = await fetch("http://localhost:8000/api/ai/explain", {
+        const res = await fetch("http://localhost:8000/api/explain", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text: selectedText })
         });
+
         const data = await res.json();
-        
-        // Create and display explanation below the current paragraph
-        const explanation = document.createElement("div");
-        explanation.className = "bg-blue-50 border-l-4 border-blue-400 p-4 mt-4 text-sm";
-        explanation.innerHTML = `<strong>Explanation:</strong> ${data.explanation || "No explanation available"}`; // Simple formatting
-        
-        // Insert after the selected paragraph
-        const selection = window.getSelection(); // Get the current selection
-        if (selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0); // Get the first range of the selection
-            const parentP = range.commonAncestorContainer.parentElement; // Get the parent element of the selection (should be a <p>)
-            if (parentP && parentP.tagName === "P") {
-                parentP.after(explanation);
-            }
-        }
+
+       modalContent.innerHTML = `
+            <p><strong>Selected Text:</strong></p>
+            <p class="italic mb-2">${selectedText}</p>
+            <p><strong>AI Explanation:</strong></p>
+            <p>${data.explanation || "No explanation available."}</p>
+        `;
+
+        explanationModal.classList.remove("hidden");
     } catch (err) {
-        console.error("Error getting explanation:", err);
-        alert("Error getting explanation.");
+        console.error("Error fetching explanation:", err);
+        modalContent.innerHTML = "<p>Error fetching explanation. Please try again.</p>";
     }
 });
 
