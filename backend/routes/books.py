@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from backend.db import books_collection
 from backend.gutenberg import fetch_books_from_gutenberg, save_books_to_db
+import requests
 
 #router = APIRouter()
 router = APIRouter(tags=["books"])
@@ -31,3 +32,19 @@ def get_book(book_id: str):
     if book:
         return book
     return {"error": "Book not found"}
+
+@router.get("/{book_id}/text")
+async def get_book_text(book_id: str):
+    """Fetch book text from Gutenberg URL (CORS proxy)"""
+    from fastapi.responses import PlainTextResponse
+    
+    book = books_collection.find_one({"book_id": book_id}, {"_id": 0})
+    if not book or not book.get("text_url"):
+        return {"error": "Book or text URL not found"}
+    
+    try:
+        res = requests.get(book["text_url"])
+        res.raise_for_status()
+        return PlainTextResponse(res.text)
+    except requests.RequestException as e:
+        return {"error": str(e)}

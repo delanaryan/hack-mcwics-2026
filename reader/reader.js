@@ -62,7 +62,8 @@ const languageMap = {
         "french": "fr",
         "spanish": "es",
         "german": "de",
-        "chinese": "zh"
+        "chinese": "zh",
+        "italian": "it",
     };
 // Language → Book screen
 languageNext.addEventListener("click", async () => {
@@ -106,30 +107,58 @@ async function openBook(book) {
 
     reader.innerHTML = "<p class='text-gray-500'>Loading book...</p>";
 
-    // Try backend book endpoint for full text
-    if (book.book_id) {
-        try {
-            const res = await fetch(`${API_BASE}/${book.book_id}`);
+    try {
+        // Fetch book details from backend (which will have the text)
+        if (book.book_id) {
+            const res = await fetch(`${API_BASE_URL}/${book.book_id}`);
             if (res.ok) {
-                const data = await res.json();
-                const raw = data.text || data.full_text || "";
-                if (raw) {
-                    const paras = raw.split(/\n{2,}/).map(p => p.trim()).filter(p => p);
-                    reader.innerHTML = paras.map((p, i) => `<p data-paragraph-id="${i+1}">${p}</p>`).join("");
-                } else if (data.text_url) {
-                    reader.innerHTML = `<p class='text-gray-500'>Book text available at: ${data.text_url}</p>`;
+                const bookData = await res.json();
+                
+                // If backend has full text, use it; otherwise fetch from text_url
+                let rawText = bookData.text || bookData.full_text || "";
+                
+                if (!rawText && bookData.text_url) {
+                    // Fetch through your backend as a proxy to avoid CORS
+                    const textRes = await fetch(`http://localhost:8000/api/books/${book.book_id}/text`);
+                    if (textRes.ok) {
+                        rawText = await textRes.text();
+                    }
+                }
+                
+                if (rawText) {
+                    // Clean up Project Gutenberg headers/footers
+                    let cleanText = rawText;
+                    const startToken = "*** START OF THE PROJECT GUTENBERG EBOOK";
+                    const endToken = "*** END OF THE PROJECT GUTENBERG EBOOK";
+                    
+                    if (cleanText.includes(startToken)) {
+                        cleanText = cleanText.split(startToken)[1];
+                    }
+                    if (cleanText.includes(endToken)) {
+                        cleanText = cleanText.split(endToken)[0];
+                    }
+                    
+                    // Split into paragraphs
+                    const paras = cleanText
+                        .split(/\n{2,}/)
+                        .map(p => p.trim())
+                        .filter(p => p && p.length > 20);
+                    
+                    reader.innerHTML = paras
+                        .map((p, i) => `<p data-paragraph-id="${i+1}">${p}</p>`)
+                        .join("");
                 } else {
                     reader.innerHTML = "<p class='text-gray-500'>Full text not available for this book.</p>";
                 }
             } else {
                 reader.innerHTML = "<p class='text-gray-500'>Unable to fetch book details.</p>";
             }
-        } catch (err) {
-            console.error("Error loading book content:", err);
-            reader.innerHTML = "<p class='text-gray-500'>Error loading book content.</p>";
+        } else {
+            reader.innerHTML = "<p class='text-gray-500'>No book id available.</p>";
         }
-    } else {
-        reader.innerHTML = "<p class='text-gray-500'>No book id available.</p>";
+    } catch (err) {
+        console.error("Error loading book content:", err);
+        reader.innerHTML = "<p class='text-gray-500'>Error loading book content.</p>";
     }
 
     bookScreen.classList.add("hidden");
@@ -141,6 +170,35 @@ async function openBook(book) {
 let selectedText = "";
 
 const explainBtn = document.getElementById("explanation-button");
+
+explainBtn.addEventListener("click", async () => {
+    try {
+        const res = await fetch("http://localhost:8000/api/ai/explain", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: selectedText })
+        });
+        const data = await res.json();
+        
+        // Create and display explanation below the current paragraph
+        const explanation = document.createElement("div");
+        explanation.className = "bg-blue-50 border-l-4 border-blue-400 p-4 mt-4 text-sm";
+        explanation.innerHTML = `<strong>Explanation:</strong> ${data.explanation || "No explanation available"}`; // Simple formatting
+        
+        // Insert after the selected paragraph
+        const selection = window.getSelection(); // Get the current selection
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0); // Get the first range of the selection
+            const parentP = range.commonAncestorContainer.parentElement; // Get the parent element of the selection (should be a <p>)
+            if (parentP && parentP.tagName === "P") {
+                parentP.after(explanation);
+            }
+        }
+    } catch (err) {
+        console.error("Error getting explanation:", err);
+        alert("Error getting explanation.");
+    }
+});
 
 document.addEventListener("mouseup", () => {
     const selection = window.getSelection();
@@ -161,6 +219,7 @@ document.addEventListener("mouseup", () => {
     explainBtn.classList.remove("hidden");
 });
 
+/*
 explainBtn.addEventListener("click", () => {
     console.log("Selected text:", selectedText);
 });
