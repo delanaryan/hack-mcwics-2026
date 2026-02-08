@@ -187,26 +187,42 @@ const closeModalBtn = document.getElementById("close-modal");
 explainBtn.addEventListener("click", async () => {
     if (!selectedText) return;
 
+    // Show loading state
+    modalContent.innerHTML = "<p class='text-gray-500'>Loading explanation...</p>";
+    explanationModal.classList.remove("hidden");
+
     try {
-        const res = await fetch("http://localhost:8000/api/explain", {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+        const res = await fetch("/api/ai/explain", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: selectedText })
+            body: JSON.stringify({ text: selectedText }),
+            signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+        }
 
         const data = await res.json();
 
-       modalContent.innerHTML = `
+        modalContent.innerHTML = `
             <p><strong>Selected Text:</strong></p>
             <p class="italic mb-2">${selectedText}</p>
             <p><strong>AI Explanation:</strong></p>
             <p>${data.explanation || "No explanation available."}</p>
         `;
-
-        explanationModal.classList.remove("hidden");
     } catch (err) {
         console.error("Error fetching explanation:", err);
-        modalContent.innerHTML = "<p>Error fetching explanation. Please try again.</p>";
+        if (err.name === "AbortError") {
+            modalContent.innerHTML = "<p>Explanation took too long. The AI model may be busy. Please try again.</p>";
+        } else {
+            modalContent.innerHTML = "<p>Error fetching explanation. Please try again.</p>";
+        }
     }
 });
 
