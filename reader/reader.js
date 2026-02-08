@@ -205,7 +205,7 @@ document.addEventListener("mouseup", () => {
     const selection = window.getSelection();
 
     if (!selection || selection.toString().trim() === "") {
-        explainBtn.classList.add("hidden");
+       // explainBtn.classList.add("hidden");
         return;
     }
 
@@ -218,6 +218,16 @@ document.addEventListener("mouseup", () => {
     explainBtn.style.left = `${rect.left + window.scrollX}px`;
 
     explainBtn.classList.remove("hidden");
+});
+
+closeModalBtn.addEventListener("click", () => {
+    explanationModal.classList.add("hidden");
+});
+
+explanationModal.addEventListener("click", (e) => {
+    if (e.target === explanationModal) {
+        explanationModal.classList.add("hidden");
+    }
 });
 
 /*

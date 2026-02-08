@@ -37,4 +37,4 @@ app.mount("/static", StaticFiles(directory="reader"), name="static")
 
 @app.get("/")
 def root():
-    return FileResponse("reader/reader.html")
+    return FileResponse("reader/index.html")
