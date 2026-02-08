@@ -128,7 +128,7 @@ async function openBook(book) {
                 
                 if (!rawText && bookData.text_url) {
                     // Fetch through your backend as a proxy to avoid CORS
-                    const textRes = await fetch(`http://localhost:8000/api/books/${book.book_id}/text`);
+                    const textRes = await fetch(`/api/books/${book.book_id}/text`);
                     if (textRes.ok) {
                         rawText = await textRes.text();
                     }
@@ -136,26 +136,41 @@ async function openBook(book) {
                 
                 if (rawText) {
                     // Clean up Project Gutenberg headers/footers
-                    let cleanText = rawText;
+                    //let cleanText = rawText;
                     const startToken = "*** START OF THE PROJECT GUTENBERG EBOOK";
                     const endToken = "*** END OF THE PROJECT GUTENBERG EBOOK";
                     
-                    if (cleanText.includes(startToken)) {
-                        cleanText = cleanText.split(startToken)[1];
-                    }
-                    if (cleanText.includes(endToken)) {
-                        cleanText = cleanText.split(endToken)[0];
-                    }
+                    let cleanText = cleanGutenbergText(rawText);
+                    
+                    console.log("Clean text preview (first 500 chars):", cleanText.substring(0, 500));
                     
                     // Split into paragraphs
                     const paras = cleanText
                         .split(/\n{2,}/)
                         .map(p => p.trim())
-                        .filter(p => p && p.length > 20);
+                        .filter(p => p && p.length > 0);
                     
-                    reader.innerHTML = paras
-                        .map((p, i) => `<p data-paragraph-id="${i+1}">${p}</p>`)
-                        .join("");
+                    console.log("Total paragraphs:", paras.length);
+                    console.log("First paragraph:", paras[0]);
+                    
+                    reader.innerHTML = paras.map((p, i) => {
+                    // Headings (ALL CAPS, short)
+                    if (/^[A-Z\s\d]+$/.test(p) && p.length < 60) {
+                        return `<h2 class="text-center font-bold text-lg mt-8 mb-4">${p}</h2>`;
+                    }
+
+                    // Chapter titles
+                    if (p.startsWith("CHAPTER")) {
+                        return `<h3 class="text-center font-semibold mt-6 mb-4">${p}</h3>`;
+                    }
+
+                    // Normal paragraphs
+                    return `
+                        <p data-paragraph-id="${i + 1}" class="leading-relaxed text-gray-900">
+                            ${p.replace(/\n/g, "<br>")}
+                        </p>
+                    `;
+                }).join("")
                 } else {
                     reader.innerHTML = "<p class='text-gray-500'>Full text not available for this book.</p>";
                 }
@@ -172,6 +187,21 @@ async function openBook(book) {
 
     bookScreen.classList.add("hidden");
     readerScreen.classList.remove("hidden");
+}
+
+function cleanGutenbergText(text) {
+    const start = text.indexOf("*** START OF");
+    const end = text.indexOf("*** END OF");
+
+    // If markers exist, extract ONLY the body
+    if (start !== -1 && end !== -1 && end > start) {
+        return text.substring(start, end)
+            .replace(/\*\*\* START OF.*?\*\*\*/s, "")
+            .replace(/\*\*\* END OF.*?\*\*\*/s, "")
+            .trim();
+    }
+
+    return text;
 }
 
 // Highlight detection
