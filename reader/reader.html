@@ -1,16 +1,3 @@
-<!--
-User picks from 5 languages
-User picks from 5 books in that language
-Book is rendered in scrollable column 
-User scrolls text
-Paragraphs are visually separated
-User highlights text
-Floating button appears: “Ask what this means”
-Response appears below the paragraph
-Other users’ annotations are visible
-This file renders:
-title, author, scrollable reading column, paragraph block-->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -24,57 +11,53 @@ title, author, scrollable reading column, paragraph block-->
 
 <body class="bg-gray-100">
 
-    <body class="bg-gray-100">
+    <!-- LANGUAGE SELECT -->
+    <div id="language-screen" class="max-w-xl mx-auto mt-20 bg-white p-6 rounded shadow">
+        <h2 class="text-2xl font-bold mb-4">Choose a language</h2>
 
-        <!-- LANGUAGE SELECT -->
-        <div id="language-screen" class="max-w-xl mx-auto mt-20 bg-white p-6 rounded shadow">
-            <h2 class="text-2xl font-bold mb-4">Choose a language</h2>
+        <select id="language-select" class="w-full p-2 border rounded mb-4">
+            <option value="">Select a language</option>
+            <option value="english">English</option>
+            <option value="russian">Russian</option>
+            <option value="french">French</option>
+            <option value="spanish">Spanish</option>
+            <option value="german">German</option>
+            <option value="chinese">Chinese</option>
+        </select>
 
-            <select id="language-select" class="w-full p-2 border rounded mb-4">
-                <option value="">Select a language</option>
-                <option value="english">English</option>
-                <option value="russian">Russian</option>
-                <option value="french">French</option>
-                <option value="spanish">Spanish</option>
-                <option value="german">German</option>
-                <option value="italian">Italian</option>
-                <option value="chinese">Chinese</option>
-            </select>
-
-            <button id="language-next" class="bg-blue-600 text-white px-4 py-2 rounded">
-                Next
-            </button>
-        </div>
-
-        <!-- BOOK SELECT -->
-        <div id="book-screen" class="hidden max-w-xl mx-auto mt-20 bg-white p-6 rounded shadow">
-            <h2 class="text-2xl font-bold mb-4">Choose a book</h2>
-
-            <ul id="book-list" class="space-y-3"></ul>
-
-            <button id="book-back" class="mt-4 text-blue-600 underline">
-                Back
-            </button>
-        </div>
-
-        <!-- READER -->
-        <div id="reader-screen" class="hidden max-w-3xl mx-auto px-6 py-10 bg-white min-h-screen">
-            <h1 id="book-title" class="text-3xl font-serif mb-2"></h1>
-            <p id="book-author" class="text-gray-500 mb-8"></p>
-
-            <div id="reader" class="space-y-6">
-                <!-- paragraphs go here -->
-            </div>
-        </div>
-        <!-- Explanation Button -->
-        <button id="explanation-button"
-            class="hidden fixed bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-xs border border-gray-300">
-            Explain the text
+        <button id="language-next" class="bg-blue-600 text-white px-4 py-2 rounded">
+            Next
         </button>
-        <script src="/static/reader.js"></script>
-    </body>
+    </div>
 
+    <!-- BOOK SELECT -->
+    <div id="book-screen" class="hidden max-w-xl mx-auto mt-20 bg-white p-6 rounded shadow">
+        <h2 class="text-2xl font-bold mb-4">Choose a book</h2>
 
+        <ul id="book-list" class="space-y-3"></ul>
+
+        <button id="book-back" class="mt-4 text-blue-600 underline">
+            Back
+        </button>
+    </div>
+
+    <!-- READER -->
+    <div id="reader-screen" class="hidden max-w-3xl mx-auto px-6 py-10 bg-white min-h-screen">
+        <h1 id="book-title" class="text-3xl font-serif mb-2"></h1>
+        <p id="book-author" class="text-gray-500 mb-8"></p>
+
+        <div id="reader" class="space-y-6">
+            <!-- paragraphs go here -->
+        </div>
+    </div>
+
+    <!-- Explanation Button -->
+    <button id="explanation-button"
+        class="hidden fixed bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-xs border border-gray-300">
+        Explain the text
+    </button>
+
+    <script src="/static/reader.js"></script>
 </body>
 
 </html>
